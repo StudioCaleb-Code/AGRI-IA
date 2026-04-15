@@ -1,0 +1,210 @@
+/* Importación de fuentes */
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;700&family=Work+Sans:wght@300;400;600&display=swap");
+
+:root {
+  /* Paleta de colores profesional y suave */
+  --primary: #2ecc71; /* Verde naturaleza suave */
+  --primary-dark: #27ae60;
+  --bg-soft: #f8faf9; /* Fondo casi blanco con toque verde */
+  --text-main: #2c3e50; /* Gris muy oscuro, no negro puro */
+  --text-muted: #7f8c8d; /* Gris para textos secundarios */
+  --white: #ffffff;
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.08);
+  --glass: rgba(255, 255, 255, 0.8);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Work Sans", sans-serif; /* Fuente más legible para interfaz */
+}
+
+body {
+  background: radial-gradient(circle at top right, #e8f5e9, #ffffff);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* --- MENÚ DE CONFIGURACIÓN --- */
+.container-menu {
+  position: absolute;
+  left: 30px;
+  top: 30px;
+  z-index: 100;
+}
+
+.btn-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--white);
+  border: 1px solid rgba(0, 0, 0, 0.05); /* Borde casi invisible */
+  padding: 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-menu:hover {
+  background: var(--white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.menu-toggle {
+  display: none;
+  margin-top: 12px;
+  background: var(--glass);
+  backdrop-filter: blur(10px); /* Efecto cristal */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: var(--shadow-md);
+  animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menu-toggle.active {
+  display: block;
+}
+
+.lista-wrapper {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lista-toggle a {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  color: var(--text-main);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.lista-toggle a:hover {
+  background: rgba(46, 204, 113, 0.1);
+  color: var(--primary-dark);
+}
+
+/* --- CONTENIDO PRINCIPAL --- */
+.main {
+  width: 90%;
+  max-width: 550px;
+  animation: fadeInUp 0.8s ease;
+}
+
+.container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-circle {
+  font-size: 2.5rem;
+  color: var(--primary);
+  background: var(--white);
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px; /* Rectángulo redondeado moderno */
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-family: "Raleway", sans-serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+h1 span {
+  color: var(--primary);
+  position: relative;
+}
+
+p {
+  line-height: 1.7;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+/* --- BOTÓN PREDECIR --- */
+.btn-ingresar {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  background: var(--text-main); /* Color elegante oscuro */
+  color: var(--white);
+  padding: 16px 40px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(44, 62, 80, 0.2);
+}
+
+.btn-ingresar:hover {
+  background: var(--primary); /* Cambia a verde al pasar el mouse */
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(46, 204, 113, 0.3);
+}
+
+/* --- BOTÓN GITHUB --- */
+.github {
+  position: absolute;
+  right: 30px;
+  bottom: 30px;
+  color: var(--text-muted);
+  font-size: 2rem;
+  transition: all 0.3s;
+  opacity: 0.6;
+}
+
+.github:hover {
+  color: var(--text-main);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* --- ANIMACIONES --- */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

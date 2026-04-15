@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agri IA - Predicción Pro</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/opciones.css') }}">
+</head>
+
+<body>
+
+    <header>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div
+                style="width:30px; height:30px; background:var(--primary); border-radius:8px; display:grid; place-items:center;">
+                <i class="bi bi-cpu-fill" style="color:#fff;"></i>
+            </div>
+            <h2>Agri IA <span style="font-weight: 400; opacity: 0.5;">PREDICTOR</span></h2>
+        </div>
+        <i class="bi bi-person-circle" style="color: #ccc; font-size: 1.5rem;"></i>
+    </header>
+
+    <div class="dashboard">
+        <section class="config-panel">
+            <div class="card">
+                <button class="btn-add" onclick="toggleModal(true)">
+                    <span>Seleccionar Cultivos</span>
+                    <i class="bi bi-list-check"></i>
+                </button>
+                <div class="lista-agregadas-scroll" id="listaFinal">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="grid-inputs">
+                    <div class="input-group">
+                        <label>Temperatura</label>
+                        <div><input type="number" id="temp" value="24"> <i class="bi bi-thermometer-sun"></i></div>
+                    </div>
+                    <div class="input-group">
+                        <label>Humedad %</label>
+                        <div><input type="number" id="hum" value="60"> <i class="bi bi-moisture"></i></div>
+                    </div>
+                </div>
+                <div class="input-group" style="margin-top: 12px;">
+                    <label>pH del Suelo</label>
+                    <div><input type="number" id="ph" value="6.5" step="0.1"> <i class="bi bi-droplet-half"></i></div>
+                </div>
+
+                <label
+                    style="font-size: 0.6rem; font-weight: 700; color: #bbb; text-transform: uppercase; margin-top: 15px; display: block;">Tipo
+                    de Fertilizante</label>
+                <div class="fert-selector">
+                    <div class="fert-btn active" onclick="setFert(this, 'organico')">ORGÁNICO</div>
+                    <div class="fert-btn" onclick="setFert(this, 'sintetico')">SINTETICO</div>
+                </div>
+            </div>
+
+            <div class="card" style="display: flex; gap: 8px;">
+                <button class="btn-action" style="background:#000; color:#fff; flex: 2;" onclick="calcular()">CALCULAR
+                    PREDICCIÓN</button>
+                <button class="btn-action" style="background:#eee; color:#333; flex: 1;" onclick="location.reload()"><i
+                        class="bi bi-arrow-clockwise"></i></button>
+            </div>
+        </section>
+
+        <section class="results-panel">
+            <div class="header-results">
+                <div>
+                    <h3 style="font-size: 1.2rem;">Análisis de Éxito</h3>
+                    <p style="font-size: 0.8rem; color: #999;">Resultados por cada tipo de cultivo</p>
+                </div>
+                <div class="main-score" id="scoreGral">0%</div>
+            </div>
+
+            <div id="contenedorResultados">
+                <div style="text-align: center; color: #ccc; margin-top: 50px;">
+                    <i class="bi bi-clipboard-data" style="font-size: 3rem;"></i>
+                    <p>Configura los datos y genera la predicción</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-window">
+            <h3 style="text-align: center; font-size: 1rem; margin-bottom: 5px;">Catálogo de Cultivos</h3>
+            <p style="text-align:center; font-size:0.75rem; color:#aaa; margin-bottom:15px;">Selecciona los que deseas
+                analizar</p>
+            <div class="grid-cat">
+                {% if plantas_csv %}
+                {% for planta in plantas_csv %}
+                <div class="cat-btn" onclick="selectPlant(this, '{{ planta }}')">{{ planta }}</div>
+                {% endfor %}
+                {% else %}
+                <p style="color:red; font-size:0.7rem;">No se encontraron plantas en el CSV</p>
+                {% endif %}
+            </div>
+            <button class="btn-action" style="background:var(--primary); color:#fff;"
+                onclick="confirmarPlantas()">AÑADIR A LA LISTA</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/opciones.js') }}"></script>
+</body>
+
+</html>
