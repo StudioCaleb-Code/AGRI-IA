@@ -1,0 +1,18 @@
+AGRI-IA/
+|_ data/
+|   |_ processed/
+|   |_ raw/
+|       |_ datos.csv
+|_ models/ # para que se guarde mi modelo pkl ya entrenado
+|_ static/ # Aqui solo css js img, ya tengo eso
+|_ src/ 
+|   |_ __init__.py 
+|   |_ model_train.py 
+|   |_ preprocessing.py 
+|_ templates/
+|   |_ index.html # Vista de decoracion para ingresar
+|   |_ opciones.html # Lugar de prediccion
+|_ ven/ # Esto es de python NO TOCAR
+|_ app.py # Para prender el servidor
+|_ requirements.txt 
+|_ README-ms
