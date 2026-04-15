@@ -47,13 +47,13 @@ function setFert(el, tipo) {
     el.classList.add('active');
     // Convertimos a minúsculas y quitamos tildes para que coincida con el CSV (organico/sintetico)
     fertSeleccionado = tipo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    if(fertSeleccionado === "inorganico") fertSeleccionado = "sintetico"; // Ajuste según tu fragmento de CSV
+    if (fertSeleccionado === "inorganico") fertSeleccionado = "sintetico"; // Ajuste según tu fragmento de CSV
 }
 
 // --- CONEXIÓN REAL CON EL MODELO PYTHON ---
 async function calcular() {
     const container = document.getElementById('contenedorResultados');
-    
+
     if (plantasFinales.size === 0) return alert("Selecciona al menos un cultivo");
 
     // Mostrar estado de carga
@@ -62,14 +62,14 @@ async function calcular() {
     // Preparar objeto de datos
     const dataToSend = {
         plantas: Array.from(plantasFinales),
-        temperatura: document.getElementById('temp').value,
-        humedad: document.getElementById('hum').value,
-        ph: document.getElementById('ph').value,
+        temperatura: parseFloat(document.getElementById('temp').value),
+        humedad: parseFloat(document.getElementById('hum').value),
+        ph: parseFloat(document.getElementById('ph').value),
         fertilizante: fertSeleccionado
     };
 
     try {
-        const response = await fetch('/predict', {
+        const response = await fetch('https://damarissolanch.pythonanywhere.com/predict', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dataToSend)
@@ -115,7 +115,7 @@ function renderizarResultados(res) {
         // Animación de la barra con el porcentaje real de la IA
         setTimeout(() => {
             const bar = document.getElementById(`bar-${item.planta}`);
-            if(bar) bar.style.width = pct + "%";
+            if (bar) bar.style.width = pct + "%";
         }, 100);
     });
 
