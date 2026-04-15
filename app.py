@@ -6,23 +6,28 @@ import numpy as np
 
 app = Flask(__name__)
 
-# --- CONFIGURACIÓN DE RUTAS ABSOLUTAS ---
+# --- RUTAS BASE ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(BASE_DIR, 'models')
 DATA_CSV = os.path.join(BASE_DIR, 'data', 'raw', 'dataset_cultivos_500.csv')
 
-# --- CARGAR EL CEREBRO DEL MODELO Y TRADUCTORES ---
-try:
-    model = joblib.load(os.path.join(MODELS_DIR, 'agri_model.pkl'))
-    scaler = joblib.load(os.path.join(MODELS_DIR, 'scaler.pkl'))
-    le_cultivo = joblib.load(os.path.join(MODELS_DIR, 'le_cultivo.pkl'))
-    le_fertilizante = joblib.load(os.path.join(MODELS_DIR, 'le_fertilizante.pkl'))
-    le_resultado = joblib.load(os.path.join(MODELS_DIR, 'le_resultado.pkl'))
-    print("SISTEMA AGRI-IA: Modelos y Encoders cargados correctamente.")
-except Exception as e:
-    print(f"ERROR CRÍTICO AL CARGAR MODELOS: {e}")
-    model = scaler = le_cultivo = le_fertilizante = le_resultado = None
+# --- CARGA SEGURA DE MODELOS ---
+def load_model(path):
+    try:
+        return joblib.load(path)
+    except Exception as e:
+        print(f"ERROR cargando {path}: {e}")
+        return None
 
+model = load_model(os.path.join(MODELS_DIR, 'agri_model.pkl'))
+scaler = load_model(os.path.join(MODELS_DIR, 'scaler.pkl'))
+le_cultivo = load_model(os.path.join(MODELS_DIR, 'le_cultivo.pkl'))
+le_fertilizante = load_model(os.path.join(MODELS_DIR, 'le_fertilizante.pkl'))
+le_resultado = load_model(os.path.join(MODELS_DIR, 'le_resultado.pkl'))
+
+print("✔ Sistema AGRI-IA iniciado")
+
+# --- RUTAS WEB ---
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -30,79 +35,89 @@ def index():
 @app.route('/opciones')
 def opciones():
     try:
-        # Leemos el CSV para obtener la lista de plantas única para el Modal
         df = pd.read_csv(DATA_CSV)
-        # Obtenemos nombres únicos, quitamos vacíos y ordenamos
+
         lista_plantas = sorted(df['tipo_cultivo'].unique())
-        # Formateamos para que se vean bien en el HTML (Primera letra mayúscula)
         lista_plantas = [p.strip().capitalize() for p in lista_plantas]
-        
+
         return render_template('opciones.html', plantas_csv=lista_plantas)
+
     except Exception as e:
-        print(f"Error al leer plantas del CSV: {e}")
+        print(f"Error CSV: {e}")
         return render_template('opciones.html', plantas_csv=[])
 
+# --- PREDICCIÓN ---
 @app.route('/predict', methods=['POST'])
 def predict():
-    if model is None:
-        return jsonify({"status": "error", "message": "Modelos no cargados"}), 500
-        
+
+    # Validación de modelos
+    if None in [model, scaler, le_cultivo, le_fertilizante, le_resultado]:
+        return jsonify({
+            "status": "error",
+            "message": "Modelos no cargados en servidor"
+        }), 500
+
     try:
         data = request.get_json()
-        plantas = data['plantas'] 
+
+        plantas = data.get('plantas', [])
         temp = float(data['temperatura'])
         hum = float(data['humedad'])
         ph = float(data['ph'])
-        fert = data['fertilizante'].lower().strip() 
+        fert = data['fertilizante'].lower().strip()
 
         resultados = []
 
         for planta in plantas:
-            planta_clean = planta.lower().strip()
-            
+
             try:
-                # 1. Transformar categorías a números
+                planta_clean = planta.lower().strip()
+
+                # Encoding
                 planta_encoded = le_cultivo.transform([planta_clean])[0]
                 fert_encoded = le_fertilizante.transform([fert])[0]
 
-                # 2. Crear DataFrame de entrada
+                # Input
                 input_data = pd.DataFrame([[planta_encoded, temp, hum, fert_encoded, ph]],
-                                         columns=['tipo_cultivo', 'temperatura', 'humedad_suelo', 'tipo_fertilizante', 'ph_suelo'])
+                                          columns=['tipo_cultivo', 'temperatura', 'humedad_suelo', 'tipo_fertilizante', 'ph_suelo'])
 
-                # 3. Escalar numéricos
+                # Escalado
                 input_data[['temperatura', 'humedad_suelo', 'ph_suelo']] = scaler.transform(
                     input_data[['temperatura', 'humedad_suelo', 'ph_suelo']]
                 )
 
-                # 4. Predicción de probabilidad
-                probabilidades = model.predict_proba(input_data)[0]
-                
-                # Identificar cuál columna es 'exito'
-                idx_exito = np.where(le_resultado.classes_ == 'exito')[0][0]
-                prob_final = round(probabilidades[idx_exito] * 100, 2)
+                # Predicción
+                probs = model.predict_proba(input_data)[0]
+
+                idx = np.where(le_resultado.classes_ == 'exito')[0][0]
+                prob_final = round(probs[idx] * 100, 2)
 
                 resultados.append({
                     "planta": planta,
                     "probabilidad": prob_final,
                     "crecera": "SÍ" if prob_final >= 65 else "NO"
                 })
-            except Exception as inner_e:
-                print(f"Error procesando {planta}: {inner_e}")
-                continue 
 
-        if resultados:
-            promedio_gral = round(sum(r['probabilidad'] for r in resultados) / len(resultados), 2)
-        else:
-            promedio_gral = 0
+            except Exception as e:
+                print(f"Error planta {planta}: {e}")
+                continue
+
+        promedio = round(
+            sum(r['probabilidad'] for r in resultados) / len(resultados), 2
+        ) if resultados else 0
 
         return jsonify({
             "status": "success",
-            "promedio": promedio_gral,
+            "promedio": promedio,
             "detalles": resultados
         })
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 400
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 400
+
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
